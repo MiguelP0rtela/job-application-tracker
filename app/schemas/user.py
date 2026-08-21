@@ -1,12 +1,15 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from app.core.security import validate_password
 
 
 class UserCreate(BaseModel):
-    username: str
+    username: str = Field(min_length=3, max_length=50)
     email: EmailStr
-    password: str
-    name: str
-    phone_number: str | None = None
+    password: str = Field(min_length=8, max_length=128)
+    name: str = Field(min_length=2, max_length=100)
+    phone_number: str | None = Field(default=None, max_length=20)
+
+    _validate_password = field_validator("password")(validate_password)
 
 
 class UserResponse(BaseModel):

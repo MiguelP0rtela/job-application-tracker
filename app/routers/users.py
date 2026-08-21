@@ -28,8 +28,7 @@ def create_user(
         email=user.email,
         password=hash_password(user.password),
         name=user.name,
-        phone_number=user.phone_number,
-        role="candidate"
+        phone_number=user.phone_number
     )
 
     try:
