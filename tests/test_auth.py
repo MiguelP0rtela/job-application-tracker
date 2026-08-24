@@ -2,7 +2,7 @@ from jose import jwt
 from starlette import status
 
 from app.core.config import settings
-from app.core.security import hash_password
+from app.core.security import hash_password, create_access_token
 from app.models.user import User
 
 
@@ -81,3 +81,97 @@ def test_login_nonexistent_email(client):
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["detail"] == "Invalid email or password."
+
+
+def test_get_current_user(client, db):
+    user = User(
+        username="currentuser",
+        email="current@example.com",
+        password=hash_password("Password123!"),
+        name="Current User",
+        phone_number="910000002",
+        role="candidate",
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    login_response = client.post(
+        "/auth/login",
+        data={
+            "username": "current@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    assert login_response.status_code == status.HTTP_200_OK
+
+    token = login_response.json()["access_token"]
+
+    response = client.get(
+        "/users/me",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+
+    assert data["id"] == user.id
+    assert data["email"] == user.email
+    assert data["username"] == user.username
+    assert data["name"] == user.name
+    assert "password" not in data
+
+
+def test_get_current_user_without_token(client):
+    response = client.get("/users/me")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_get_current_user_invalid_token(client):
+    response = client.get(
+        "/users/me",
+        headers={
+            "Authorization": "Bearer invalid-token",
+        },
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Could not validate credentials"
+
+
+def test_get_current_user_token_without_sub(client):
+    token = create_access_token(
+        data={"something": "else"}
+    )
+
+    response = client.get(
+        "/users/me",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Could not validate credentials"
+
+
+def test_get_current_user_nonexistent_user(client):
+    token = create_access_token(
+        data={"sub": "nonexistent@example.com"}
+    )
+
+    response = client.get(
+        "/users/me",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Could not validate credentials"
