@@ -1,539 +1,158 @@
-# 🚀 Job Application Tracker
+# Job Application Tracker
 
-A full-stack job application tracking platform designed to help candidates manage their job search while allowing companies to create and manage job opportunities.
+A full-stack platform for managing the job search and recruitment lifecycle — candidates track applications end-to-end, companies post and manage job opportunities, all through a REST API built with production practices in mind.
 
-The project is being developed with a focus on **backend architecture, authentication, database design, API development, testing, Docker, CI/CD, and production-ready software practices**.
+**Status:** actively in development — backend-first, frontend to follow.
 
----
-
-# ✨ Features
-
-### 👤 User Management
-
-* User registration
-* User authentication
-* Candidate accounts
-* Company accounts
-* Role-based authorization
-* User profile management
-
-### 🏢 Company Management
-
-* Company creation
-* Company members
-* Company roles
-* Company job management
-
-### 💼 Job Management
-
-* Create job opportunities
-* Edit job opportunities
-* Delete job opportunities
-* View available jobs
-* Search and filter jobs
-* Job details
-
-### 📄 Application Management
-
-* Apply to jobs
-* Track application status
-* Upload CV
-* Cover letters
-* Additional application information
-* Candidate application history
-
-### 🔐 Security
-
-* Password hashing
-* JWT authentication
-* Protected routes
-* Role-based access control
-* Environment-based configuration
-
-### 🧪 Quality
-
-* Automated tests
-* Test coverage
-* Database migrations
-* CI/CD
-* Dockerized development environment
-
-> 🚧 Features are being implemented progressively throughout the project.
+[![Python](https://img.shields.io/badge/Python-3.14-blue)]()
+[![FastAPI](https://img.shields.io/badge/FastAPI-REST%20API-009688)]()
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)]()
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)]()
+[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF)]()
+[![License](https://img.shields.io/badge/License-MIT-lightgrey)]()
 
 ---
 
-# 🛠️ Tech Stack
+## Why this project
 
-| Technology     | Purpose              |
-| -------------- | -------------------- |
-| Python         | Programming Language |
-| FastAPI        | REST API Framework   |
-| SQLAlchemy     | ORM                  |
-| PostgreSQL     | Relational Database  |
-| Alembic        | Database Migrations  |
-| Pydantic       | Data Validation      |
-| JWT            | Authentication       |
-| Argon2         | Password Hashing     |
-| Docker         | Containerization     |
-| Docker Compose | Local Infrastructure |
-| Pytest         | Testing              |
-| GitHub Actions | CI/CD                |
-| DataGrip       | Database Management  |
+Most job hunts happen across spreadsheets, browser tabs, and email threads. This project centralizes that process into a single platform: candidates get one place to search, apply, and track; companies get one place to post roles and manage applicants. It's built as a real full-stack application — not a CRUD demo — with the architecture, testing, and deployment practices that a production system would need.
+
+## What it does today vs. what's coming
+
+| | Candidates | Companies |
+|---|---|---|
+| **Now** | Authenticate via JWT | Store & version company profiles |
+| **Next** | Search, save, and apply to jobs | Post, edit, and publish jobs |
+| **Later** | Track applications & interviews | Manage applicants & recruitment stages |
 
 ---
 
-# 🏗️ Architecture
+## Tech Stack
 
-The project follows a modular backend architecture designed to separate API endpoints, business logic, database models, and validation.
+| Layer | Choices |
+|---|---|
+| **API** | FastAPI, Pydantic, Pydantic Settings |
+| **Data** | PostgreSQL, SQLAlchemy, Alembic |
+| **Auth** | JWT (python-jose), OAuth2 bearer, Argon2 hashing (pwdlib) |
+| **Testing** | Pytest, HTTPX, PostgreSQL-backed integration tests |
+| **Infra** | Docker, Docker Compose, GitHub Actions |
+| **Frontend** *(planned)* | React, TypeScript, Vite, React Router, Tailwind CSS |
 
-```text
-app/
-├── core/          # Configuration, security and authentication
-├── database/      # Database engine and session management
-├── models/        # SQLAlchemy models
-├── routers/       # API endpoints
-├── schemas/       # Pydantic schemas
-├── services/      # Business logic
-└── main.py        # FastAPI application
+## Architecture
+
+```
+Frontend (React + TS)
+        │  REST / HTTP
+        ▼
+FastAPI  →  Routers → Schemas → Services → Security
+        │  SQLAlchemy
+        ▼
+PostgreSQL  (Users · Companies · Jobs · Applications · Interviews)
+```
+
+Domain model, once fully built out:
+
+```
+User → CompanyMember → Company → Job → Application → back to User
 ```
 
 ---
 
-# 🗄️ Database Architecture
-
-The initial database model is based around users, companies, jobs, and applications.
-
-```text
-User
- │
- ├───────────────┐
- │               │
- ▼               ▼
-Application    CompanyMember
- │               │
- │               ▼
- ▼             Company
-Job              │
- ▲               │
- └───────────────┘
-```
-
-### Current User Model
-
-```text
-User
-├── id
-├── username
-├── email
-├── password
-├── name
-├── phone_number
-├── role
-├── created_at
-└── updated_at
-```
-
-### Planned Entities
-
-```text
-Company
-├── id
-└── name
-
-CompanyMember
-├── id
-├── role
-├── salary
-├── user_id
-└── company_id
-
-Job
-├── id
-├── title
-├── content
-└── company_id
-
-Application
-├── id
-├── cv
-├── letter
-├── info
-├── user_id
-└── job_id
-```
-
-The database schema will evolve through **Alembic migrations** rather than manually modifying the PostgreSQL database.
-
----
-
-# 🚀 Getting Started
-
-## 1. Clone the repository
+## Quickstart
 
 ```bash
 git clone https://github.com/MiguelP0rtela/job-application-tracker.git
 cd job-application-tracker
+cp .env.example .env          # fill in your own secrets
+docker compose up -d          # API + PostgreSQL
 ```
 
----
+API live at `http://localhost:8000` · Docs at `/docs` (Swagger) and `/redoc`.
 
-## 2. Create a virtual environment
-
-### Windows
-
+**Running without Docker:**
 ```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-### Linux / macOS
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
----
-
-## 3. Install dependencies
-
-```bash
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-```
-
----
-
-## 4. Configure environment variables
-
-Create a `.env` file based on `.env.example`.
-
-Example:
-
-```env
-POSTGRES_USER=jobtracker
-POSTGRES_PASSWORD=your_password
-POSTGRES_DB=job_tracker
-
-DATABASE_URL=postgresql://jobtracker:your_password@localhost:5432/job_tracker
-```
-
-> Never commit `.env` or real credentials to the repository.
-
----
-
-# 🐳 Running PostgreSQL
-
-Start the PostgreSQL container:
-
-```bash
-docker compose up -d postgres
-```
-
-Check running containers:
-
-```bash
-docker ps
-```
-
-The PostgreSQL database will be available on:
-
-```text
-localhost:5432
-```
-
----
-
-# 🗃️ Database Migrations
-
-The project uses **Alembic** for database schema management.
-
-Create a new migration:
-
-```bash
-alembic revision --autogenerate -m "migration description"
-```
-
-Apply migrations:
-
-```bash
-alembic upgrade head
-```
-
-Rollback the latest migration:
-
-```bash
-alembic downgrade -1
-```
-
-Check the current migration:
-
-```bash
-alembic current
-```
-
----
-
-# ⚡ Running the API
-
-Start the development server:
-
-```bash
 python -m uvicorn app.main:app --reload
 ```
 
-The API will be available at:
-
-```text
-http://localhost:8000
-```
-
-### Swagger
-
-```text
-http://localhost:8000/docs
-```
-
-### ReDoc
-
-```text
-http://localhost:8000/redoc
-```
-
----
-
-# 📡 Planned API
-
-## Authentication
-
-| Method | Endpoint         | Description           |
-| ------ | ---------------- | --------------------- |
-| POST   | `/auth/register` | Register a user       |
-| POST   | `/auth/login`    | Authenticate user     |
-| POST   | `/auth/refresh`  | Refresh access token  |
-| POST   | `/auth/logout`   | Revoke authentication |
-
----
-
-## Users
-
-| Method | Endpoint             | Description      |
-| ------ | -------------------- | ---------------- |
-| GET    | `/users/me`          | Get current user |
-| PATCH  | `/users/me`          | Update profile   |
-| PATCH  | `/users/me/password` | Change password  |
-
----
-
-## Companies
-
-| Method | Endpoint          | Description    |
-| ------ | ----------------- | -------------- |
-| POST   | `/companies`      | Create company |
-| GET    | `/companies/{id}` | Get company    |
-| PATCH  | `/companies/{id}` | Update company |
-| DELETE | `/companies/{id}` | Delete company |
-
----
-
-## Jobs
-
-| Method | Endpoint     | Description |
-| ------ | ------------ | ----------- |
-| POST   | `/jobs`      | Create job  |
-| GET    | `/jobs`      | List jobs   |
-| GET    | `/jobs/{id}` | Get job     |
-| PATCH  | `/jobs/{id}` | Update job  |
-| DELETE | `/jobs/{id}` | Delete job  |
-
----
-
-## Applications
-
-| Method | Endpoint             | Description          |
-| ------ | -------------------- | -------------------- |
-| POST   | `/applications`      | Apply to a job       |
-| GET    | `/applications`      | List applications    |
-| GET    | `/applications/{id}` | Get application      |
-| PATCH  | `/applications/{id}` | Update application   |
-| DELETE | `/applications/{id}` | Withdraw application |
-
-> API endpoints are subject to change as the application architecture evolves.
-
----
-
-# 🧪 Testing
-
-The project will use **Pytest** for automated testing.
-
-Run all tests:
-
+**Migrations:**
 ```bash
-pytest
+alembic upgrade head                              # apply
+alembic revision --autogenerate -m "description"  # create
 ```
 
-Run tests with coverage:
-
+**Tests:**
 ```bash
 pytest --cov=app --cov-report=term-missing
 ```
 
-The testing strategy will cover:
-
-* User registration
-* Authentication
-* Authorization
-* Company management
-* Job management
-* Job applications
-* Validation
-* Database interactions
-* Protected endpoints
-* Role-based permissions
-
 ---
 
-# 🔄 CI/CD
+## Authentication
 
-GitHub Actions will be used to automate the development workflow.
+JWT-based, OAuth2 bearer flow, Argon2 password hashing. Passwords require an uppercase letter, a lowercase letter, a number, a special character, and no whitespace.
 
-Planned pipeline:
-
-```text
-Push / Pull Request
-        ↓
-Install dependencies
-        ↓
-Start PostgreSQL
-        ↓
-Run migrations
-        ↓
-Run tests
-        ↓
-Generate coverage
-        ↓
-Code quality checks
+```
+POST /auth/login → verify credentials → issue JWT
+Authorization: Bearer <token> → protected routes
 ```
 
-Planned quality checks include:
+## API Roadmap
 
-* Pytest
-* Coverage
-* Ruff
-* Mypy
+| Domain | Endpoints | Status |
+|---|---|---|
+| Auth | register, login, refresh, logout | login ✅ · rest ⏳ |
+| Users | get/update profile, change password, delete account | ⏳ |
+| Companies | CRUD, members, roles | ⏳ |
+| Jobs | CRUD, search, filter, publish | ⏳ |
+| Applications | apply, track, withdraw, status | ⏳ |
 
----
-
-# 📌 Project Status
-
-| Feature                    | Status |
-| -------------------------- | :----: |
-| FastAPI project setup      |    ✅   |
-| Virtual environment        |    ✅   |
-| PostgreSQL                 |    ✅   |
-| Docker PostgreSQL          |    ✅   |
-| SQLAlchemy                 |    ✅   |
-| Environment configuration  |    ✅   |
-| Alembic                    |    ✅   |
-| Initial database migration |    ✅   |
-| User model                 |    ✅   |
-| User schemas               |    ⏳   |
-| User registration          |    ⏳   |
-| Password hashing           |    ⏳   |
-| JWT authentication         |    ⏳   |
-| Refresh tokens             |    ⏳   |
-| Protected routes           |    ⏳   |
-| Role-based authorization   |    ⏳   |
-| Company model              |    ⏳   |
-| Company members            |    ⏳   |
-| Job model                  |    ⏳   |
-| Job management             |    ⏳   |
-| Application model          |    ⏳   |
-| Application management     |    ⏳   |
-| Automated tests            |    ⏳   |
-| Test coverage              |    ⏳   |
-| GitHub Actions             |    ⏳   |
-| Dockerized API             |    ⏳   |
-| Deployment                 |    ⏳   |
+Full endpoint list and request/response schemas: see `/docs` once the API is running.
 
 ---
 
-# 🎯 Project Goals
+## Project Structure
 
-The main goal of this project is to build a realistic full-stack application while applying production-oriented software engineering practices.
+```
+app/
+├── core/       # config, security
+├── database/   # engine, session
+├── models/     # SQLAlchemy models
+├── routers/    # API endpoints
+├── schemas/    # Pydantic schemas
+└── services/   # business logic
+tests/          # Pytest suite (PostgreSQL-backed)
+alembic/        # migrations
+```
 
-The project focuses on:
+## CI/CD
 
-* REST API development
-* Authentication and authorization
-* Relational database design
-* Database migrations
-* Secure password handling
-* Role-based access control
-* Docker
-* Automated testing
-* CI/CD
-* Clean and maintainable architecture
-* Production deployment
+Every push and PR runs the test suite against a PostgreSQL service container via GitHub Actions. Planned: coverage gating, Ruff, Mypy, and a deployment pipeline.
 
----
+## Roadmap
 
-# 🎓 Learning Objectives
+- [x] Backend foundation — FastAPI, PostgreSQL, Docker, CI
+- [x] Authentication — JWT, OAuth2, login, tests
+- [ ] User management — registration, profile, preferences
+- [ ] Company management — CRUD, members, roles
+- [ ] Job management — CRUD, search, filtering
+- [ ] Application management — apply, track, withdraw
+- [ ] Recruitment management — interviews, scheduling
+- [ ] Frontend — React + TypeScript dashboards
+- [ ] Production — deployment, monitoring, rate limiting
 
-This project is being developed to strengthen practical knowledge of:
+## Design Principles
 
-* Python
-* FastAPI
-* SQLAlchemy
-* PostgreSQL
-* Alembic
-* Pydantic
-* REST API design
-* JWT authentication
-* Password hashing
-* Role-based authorization
-* Docker
-* Database architecture
-* Automated testing
-* CI/CD
-* Backend architecture
-* Full-stack application development
+Separation of concerns · dependency injection · RESTful design · explicit validation · role-based authorization · migration-driven schema changes · containerized, testable, incremental development.
 
 ---
 
-# 🚀 Future Improvements
-
-Potential future improvements include:
-
-* 🔎 Advanced job search
-* 🎯 Job recommendation system
-* 📊 Application analytics
-* 📈 Candidate dashboard
-* 📬 Email notifications
-* 📅 Interview scheduling
-* 📎 Cloud file storage for CVs
-* 🔐 Additional security hardening
-* 🚦 Rate limiting
-* 📊 Logging and monitoring
-* 📈 Prometheus metrics
-* ☁️ Cloud deployment
-* 🤖 AI-assisted job matching
-
----
-
-# 🤝 Author
+## Author
 
 **Miguel Portela**
+[GitHub](https://github.com/MiguelP0rtela) · [LinkedIn](https://www.linkedin.com/in/miguel-portela-helloworld/)
 
-### GitHub
+## License
 
-https://github.com/MiguelP0rtela
-
-### LinkedIn
-
-https://www.linkedin.com/in/miguel-portela-helloworld/
-
----
-
-# 📄 License
-
-This project is licensed under the **MIT License**.
+MIT
