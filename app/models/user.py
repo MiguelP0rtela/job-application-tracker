@@ -5,6 +5,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.database import Base
 
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import relationship
+
+if TYPE_CHECKING:
+    from app.models.job_application import JobApplication
+
 
 class User(Base):
     __tablename__ = "users"
@@ -39,6 +46,11 @@ class User(Base):
     phone_number: Mapped[str | None] = mapped_column(
         String(20),
         nullable=True,
+    )
+
+    job_applications: Mapped[list["JobApplication"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
     role: Mapped[str] = mapped_column(

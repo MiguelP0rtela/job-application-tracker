@@ -5,6 +5,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.database import Base
 
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import relationship
+
+if TYPE_CHECKING:
+    from app.models.job_application import JobApplication
+
 
 class Company(Base):
     __tablename__ = "companies"
@@ -38,6 +45,10 @@ class Company(Base):
     logo: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
+    )
+
+    job_applications: Mapped[list["JobApplication"]] = relationship(
+        back_populates="company",
     )
 
     created_at: Mapped[datetime] = mapped_column(
