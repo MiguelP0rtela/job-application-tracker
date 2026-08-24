@@ -175,3 +175,88 @@ def test_get_current_user_nonexistent_user(client):
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json()["detail"] == "Could not validate credentials"
+
+def test_admin_route_without_token(client):
+    response = client.get("/users/admin")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_admin_route_as_candidate(client, db):
+    user = User(
+        username="candidateadmin",
+        email="candidateadmin@example.com",
+        password=hash_password("Password123!"),
+        name="Candidate Admin",
+        phone_number="910000003",
+        role="candidate",
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    login_response = client.post(
+        "/auth/login",
+        data={
+            "username": "candidateadmin@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    assert login_response.status_code == status.HTTP_200_OK
+
+    token = login_response.json()["access_token"]
+
+    response = client.get(
+        "/users/admin",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["detail"] == "Admin privileges required."
+
+
+def test_admin_route_as_admin(client, db):
+    user = User(
+        username="adminuser",
+        email="admin@example.com",
+        password=hash_password("Password123!"),
+        name="Admin User",
+        phone_number="910000004",
+        role="admin",
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    login_response = client.post(
+        "/auth/login",
+        data={
+            "username": "admin@example.com",
+            "password": "Password123!",
+        },
+    )
+
+    assert login_response.status_code == status.HTTP_200_OK
+
+    token = login_response.json()["access_token"]
+
+    response = client.get(
+        "/users/admin",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+
+    assert data["id"] == user.id
+    assert data["email"] == user.email
+    assert data["role"] == "admin"
+    assert "password" not in data
