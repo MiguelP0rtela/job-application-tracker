@@ -33,6 +33,11 @@ jobs:
       DATABASE_URL: postgresql+psycopg://jobtracker:password@localhost:5432/job_tracker_test
       TEST_DATABASE_URL: postgresql+psycopg://jobtracker:password@localhost:5432/job_tracker_test
 
+      SECRET_KEY: test_secret_key
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
